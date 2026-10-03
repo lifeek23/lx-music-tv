@@ -57,6 +57,8 @@ class ScriptParserTest {
              * @name 多平台音乐源
              * @version 2.0.0
              */
+
+            const { EVENT_NAMES, send } = globalThis.lx
             
             send(EVENT_NAMES.inited, {
                 sources: {
@@ -95,7 +97,7 @@ class ScriptParserTest {
     }
 
     @Test
-    fun `test parse script without name annotation`() {
+    fun `test rejects script without required name annotation`() {
         val scriptContent = """
             /**
              * @version 1.0.0
@@ -109,10 +111,7 @@ class ScriptParserTest {
 
         val result = parser.parse(scriptContent)
 
-        assertTrue(result is ParseResult.Success)
-        val success = result as ParseResult.Success
-        // 没有@name注解时，应该使用默认名称
-        assertEquals("未知源", success.metadata.name)
+        assertTrue(result is ParseResult.Error)
     }
 
     @Test
@@ -122,6 +121,8 @@ class ScriptParserTest {
              * @name 本地音乐源
              * @version 1.0.0
              */
+
+            const { EVENT_NAMES, send } = globalThis.lx
             
             send(EVENT_NAMES.inited, {
                 sources: {
@@ -204,9 +205,7 @@ class ScriptParserTest {
              */
             console.log('test')
         """.trimIndent()
-        // 这个应该失败，因为没有send调用
-        // 但根据当前实现，可能仍然会通过验证
-        // 需要根据实际验证逻辑调整
+        assertTrue(parser.parse(invalidScript2) is ParseResult.Error)
     }
 
     @Test
@@ -216,6 +215,8 @@ class ScriptParserTest {
              * @name 音质测试源
              * @version 1.0.0
              */
+
+            const { EVENT_NAMES, send } = globalThis.lx
             
             send(EVENT_NAMES.inited, {
                 sources: {
@@ -245,10 +246,11 @@ class ScriptParserTest {
     @Test
     fun `test parse real world script`() {
         // 读取测试脚本文件
-        val testScriptPath = "test/test_source.js"
-        val testScriptFile = File(testScriptPath)
-        
-        if (testScriptFile.exists()) {
+        val testScriptFile = listOf(File("test/test_source.js"), File("../test/test_source.js"))
+            .firstOrNull { it.exists() }
+        assertNotNull("找不到真实音源测试文件", testScriptFile)
+
+        testScriptFile?.let {
             val scriptContent = testScriptFile.readText(Charsets.UTF_8)
             val result = parser.parse(scriptContent)
             
