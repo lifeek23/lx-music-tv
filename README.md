@@ -163,7 +163,7 @@ LXMusicTV/
 ## 🔧 构建
 
 ### 环境要求
-- Android Studio（新版）+ Android SDK 35
+- Android Studio（新版）+ Android SDK 37（与 `compileSdk` 一致）
 - JDK 17+
 - Gradle 9.5.0（项目内置 wrapper）
 
@@ -173,11 +173,20 @@ LXMusicTV/
 3. 连接 Android TV 设备（或电视盒子，开启 ADB）
 4. `./gradlew :app:installDebug` 或 Android Studio 直接 Run
 
+### GitHub 云端构建（无需本地 Android 环境）
+1. 在自己的 GitHub 仓库打开 **Actions**；若提示禁用工作流，先启用。
+2. 选择 **Build Debug APK**，点击 **Run workflow**，选择 `main` 并运行。
+3. 等待构建成功，在运行详情页的 **Artifacts** 下载 `lx-music-tv-debug-运行编号`。
+4. 解压下载的 ZIP，获得 `app-debug.apk`，传到电视安装。
+
+工作流使用 JDK 21、Android SDK 37 和项目自带 Gradle Wrapper，先运行单元测试再构建 Debug APK。APK 和测试报告保留 14 天。
+Debug APK 使用调试签名，可能无法覆盖作者签名的正式版；安装前请保留原有应用数据。
+
 ### 已知问题
 1. 小秋音乐平台部分歌单无法打开，实测是QQ音乐接口问题  
 2. 小蜜音乐平台未经过测试，可能存在某些界面请求失败或者无法播放的问题  
 3. 搜索联想功能经过实测后全部平台统一使用小芸音乐的接口，但是还是有时候需要输入全拼才能出现正确联想（比如想要搜索”海贼王“时输入“HZW”无效，得输入“HAIZE”才出现“海贼王”，有些则只需输入首字母即可）
-4. 歌词翻译功能目前只有小芸音乐平台生效  
+4. 歌词翻译支持小芸音乐和小秋音乐（歌曲本身需有翻译）；小秋音乐使用 `GetPlayLyricInfo` 获取原文和翻译，新接口失败时回退旧接口原文。升级后会自动重新获取小秋音乐歌词缓存。
 
 ### 问题反馈  
 2.9版本设置页面加入了web端查看日志的功能，如果遇到什么问题需要提issue可以附带上这部分日志。
